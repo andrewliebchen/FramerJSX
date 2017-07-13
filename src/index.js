@@ -1,31 +1,55 @@
-import fbColor from './fb-color';
-import browser from './browser';
+import React, { Component } from 'react';
+import { render } from 'react-dom';
 
-Framer.Defaults.Animation = {
-	curve: Spring({damping: 0.5}),
+// Device types?
+const Prototype = (props) => props.children;
+
+// Layer states?
+class FLayer extends Component {
+  render() {
+    let parentLayer = new Layer(this.props);
+
+    parentLayer.onClick(() => {
+      console.log(parentLayer.states);
+      this.props.onClick(parentLayer);
+    });
+
+    this.props.children.length > 1 && this.props.children.map((child, i) =>
+      new Layer(Object.assign(
+        { parent: parentLayer },
+        child.props
+      ))
+    );
+
+    return false;
+  }
+}
+
+const F = {
+  Layer: FLayer,
+  Prototype: Prototype
 };
 
-let layerA = new Layer({
-	backgroundColor: fbColor('blueAccent'),
-	x: Align.center,
-	y: Align.center,
-	opacity: 1,
-	scale: 1,
-});
 
-layerA.states = {
-	hide: {
-		opacity: 0,
-		scale: 0.5,
-	}
-};
+render(
+  <F.Prototype>
+    <F.Layer
+      backgroundColor={new Color('blue').alpha(0.5)}
+      x={Align.center(20)}
+      y={Align.center(20)}
+      states={{ hide: { opacity: 0 }}}
+      onClick={(self) => { self.stateCycle() }}>
 
-layerA.on(Events.Click, () => {
-	layerA.animate('hide');
-});
+      <F.Layer
+        backgroundColor={new Color('red').alpha(0.5)}
+        x={Align.center(-20)}
+        y={Align.center(-20)}/>
 
-layerA.on(Events.AnimationEnd, () => {
-	Utils.delay(0.2, () => {
-		layerA.animate('default');
-	});
-});
+      <F.Layer
+        backgroundColor={new Color('magenta').alpha(0.5)}
+        x={Align.center(-40)}
+        y={Align.center(-40)}/>
+    </F.Layer>
+  </F.Prototype>,
+  document.getElementById('prototype')
+);
