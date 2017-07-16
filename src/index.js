@@ -1,8 +1,15 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
+import PropTypes from 'prop-types';
 
-// Device types?
-const Prototype = (props) => props.children;
+
+const Prototype = (props) => { 
+  let device = new DeviceComponent({...props});
+  device.setupContext();
+
+  return props.children;
+};
+
 
 class FLayer extends Component {
 	_bindEvents(layer, props) {
@@ -45,14 +52,37 @@ class FLayer extends Component {
   }
 }
 
-const F = {
-  Layer: FLayer,
-  Prototype: Prototype
+class FTextLayer extends Component {
+  render() {
+    return false;
+  }
+}
+
+class FScrollComponent extends Component {
+  render() {
+    return false;
+  }
+}
+
+Prototype.propTypes = {
+  deviceType: PropTypes.string,
 };
 
+FLayer.propTypes = {
+  states: PropTypes.array,
+  onClick: PropTypes.func,
+};
+
+const F = {
+  Layer: FLayer,
+  Prototype: Prototype,
+  ScrollComponent: FScrollComponent,
+  TextLayer: FTextLayer,
+};
 
 render(
-  <F.Prototype>
+  <F.Prototype
+    deviceType="apple-iphone-6s-plus-space-gray">
     <F.Layer
       backgroundColor={new Color('blue').alpha(0.5)}
       x={Align.center}
