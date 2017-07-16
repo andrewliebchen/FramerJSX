@@ -5,18 +5,14 @@ import { render } from 'react-dom';
 const Prototype = (props) => props.children;
 
 class FLayer extends Component {
-	_bindEvents(layer) {
-		const { onClick } = this.props;
-
-		onClick && layer.onClick(() => {
-      onClick(layer);
+	_bindEvents(layer, props) {
+		props.onClick && layer.onClick(() => {
+      props.onClick(layer);
     });
 	}
 
-	_registerStates(layer) {
-		const { states } = this.props;
-
-		states && states.map((state, i) => {
+	_registerStates(layer, props) {
+		props.states && props.states.map((state, i) => {
 			const stateName = Object.keys(state);
 			layer.states[stateName] = state[stateName];
 		});
@@ -26,21 +22,24 @@ class FLayer extends Component {
 		const { children } = this.props;
 
 		React.Children.forEach(children, (child) => {
-			console.log(child);
+			let childLayer = new Layer({
+        parent: layer,
+        ...child.props,
+      });
+
+      this._bindEvents(childLayer, child.props);
+      this._registerStates(childLayer, child.props);
     });
 	}
 
-	_constructLayerAccessories(layer) {
-		this._bindEvents(layer);
-		this._registerStates(layer);
-    this._renderChildren(layer);
-	}
 
   render() {
 		// Render parent layer
     let parentLayer = new Layer(this.props);
 
-		this._constructLayerAccessories(parentLayer);
+    this._bindEvents(parentLayer, this.props);
+    this._registerStates(parentLayer, this.props);
+    this._renderChildren(parentLayer);
 
     return false;
   }
@@ -56,20 +55,20 @@ render(
   <F.Prototype>
     <F.Layer
       backgroundColor={new Color('blue').alpha(0.5)}
-      x={Align.center(20)}
-      y={Align.center(20)}>
+      x={Align.center}
+      y={Align.center}>
 
       <F.Layer
-        backgroundColor={new Color('red').alpha(0.5)}
-        x={Align.center(-20)}
-        y={Align.center(-20)}
-				states={[{ hide: { opacity: 0 }}]}
-	      onClick={(self) => { self.stateCycle() }}/>
+        backgroundColor={new Color('yellow').alpha(0.5)}
+        x={Align.center(-200)}
+        y={Align.center(-200)}
+        states={[{ hide: { opacity: 0 }}]}
+        onClick={(self) => { self.stateCycle() }}/>
 
       <F.Layer
         backgroundColor={new Color('magenta').alpha(0.5)}
-        x={Align.center(-40)}
-        y={Align.center(-40)}/>
+        x={Align.center(20)}
+        y={Align.center(20)}/>
     </F.Layer>
   </F.Prototype>,
   document.getElementById('prototype')
